@@ -1,0 +1,262 @@
+﻿<UserControl x:Class="StorageManager.Views.StorageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StorageManager"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <!-- Добавляем конвертер -->
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Остальные стили -->
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок и кнопки действий -->
+        <Border Grid.Row="0" 
+                Background="#1565C0" 
+                CornerRadius="8"
+                Padding="15"
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="🏢" FontSize="24" Margin="0,0,10,0"/>
+                    <TextBlock Text="Управление складами" 
+                               FontSize="18" 
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="➕ Новый склад" 
+                            Command="{Binding AddStorageCommand}"
+                            Background="#28a745"
+                            Foreground="White"/>
+
+                    <Button Content="🔄 Обновить" 
+                            Command="{Binding LoadStoragesCommand}"
+                            Background="#6c757d"
+                            Foreground="White"
+                            Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="350"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая часть: Список складов -->
+            <Border Grid.Column="0" 
+                    Margin="0,0,10,0"
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Поиск -->
+                    <StackPanel Grid.Row="0" 
+                                Orientation="Horizontal" 
+                                Margin="15,15,15,10">
+                        <!-- Поиск -->
+                        <StackPanel Width="300" Margin="0,0,10,0">
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="White"
+                                     BorderBrush="#E0E0E0"
+                                     Padding="8"/>
+                            <TextBlock Text="Поиск складов..." 
+                                       Margin="10,-55,0,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="#999"
+                                       IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SearchText}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SearchText}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Список складов -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding FilteredStorages}"
+                              SelectedItem="{Binding SelectedStorage}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              BorderThickness="0"
+                              SelectionMode="Single"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="True"
+                              AlternatingRowBackground="#F8F9FA"
+                              Margin="15,0,15,15">
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" 
+                                                Binding="{Binding StorageId}" 
+                                                Width="50"/>
+
+                            <DataGridTextColumn Header="Название склада" 
+                                                Binding="{Binding StorageName}" 
+                                                Width="200"/>
+
+                            <DataGridTextColumn Header="Адрес" 
+                                                Binding="{Binding FullAddress}" 
+                                                Width="300"/>
+
+                            <DataGridTemplateColumn Header="Действия" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="✏️" 
+                                                    Command="{Binding DataContext.EditStorageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip="Редактировать"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="5"
+                                                    Cursor="Hand"/>
+
+                                            <Button Content="🗑️" 
+                                                    Command="{Binding DataContext.DeleteStorageCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip="Удалить"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Padding="5"
+                                                    Cursor="Hand"
+                                                    Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#E3F2FD"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Правая часть: Форма редактирования -->
+            <Border Grid.Column="1" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{Binding FormTitle}" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Форма -->
+                        <StackPanel>
+                            <TextBlock Text="Название склада *" 
+                                       FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding CurrentStorage.StorageName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <TextBlock Text="Адрес" 
+                                       FontWeight="SemiBold"
+                                       Margin="0,10,0,0"/>
+                            <!-- Пока просто текстовое поле для адреса, потом можно сделать выпадающий список -->
+                            <TextBox Text="{Binding CurrentStorage.TempAddress, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="80"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"/>
+
+                            <!-- Кнопки формы -->
+                            <StackPanel Orientation="Horizontal" 
+                                        HorizontalAlignment="Right"
+                                        Margin="0,20,0,0">
+                                <Button Content="Отмена" 
+                                        Command="{Binding CancelCommand}"
+                                        Background="#6c757d"
+                                        Foreground="White"/>
+
+                                <Button Content="{Binding SaveButtonText}" 
+                                        Command="{Binding SaveStorageCommand}"
+                                        Background="#28a745"
+                                        Foreground="White"
+                                        Margin="10,0,0,0"/>
+                            </StackPanel>
+
+                            <!-- Сообщения об ошибках -->
+                            <Border Background="#FFEBEE" 
+                                    BorderBrush="#EF9A9A" 
+                                    BorderThickness="1" 
+                                    CornerRadius="4"
+                                    Padding="10"
+                                    Margin="0,20,0,0"
+                                    Visibility="{Binding HasErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{Binding ErrorMessage}" 
+                                           Foreground="#D32F2F" 
+                                           TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,278 @@
+﻿<UserControl x:Class="StorageManager.Views.DocumentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:StorageManager"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style TargetType="DatePicker">
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0" 
+                Background="#1565C0" 
+                CornerRadius="8"
+                Padding="15"
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="📄" FontSize="24" Margin="0,0,10,0"/>
+                    <TextBlock Text="{Binding FormTitle}" 
+                               FontSize="18" 
+                               FontWeight="Bold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="💾 Сохранить черновик" 
+                            Command="{Binding SaveDraftCommand}"
+                            Background="#6c757d"
+                            Foreground="White"
+                            Margin="0,0,10,0"/>
+
+                    <Button Content="✅ Провести документ" 
+                            Command="{Binding PostDocumentCommand}"
+                            Background="#28a745"
+                            Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основной контент -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая часть: Реквизиты документа -->
+            <Border Grid.Column="0" 
+                    Margin="0,0,10,0"
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Реквизиты документа" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Тип документа (только для чтения) -->
+                        <TextBlock Text="Тип документа" 
+                                   FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding CurrentDocument.DocumentType, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 Background="#F8F9FA"/>
+
+                        <!-- Дата документа -->
+                        <TextBlock Text="Дата документа *" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,10,0,0"/>
+                        <DatePicker SelectedDate="{Binding CurrentDocument.DocumentDate}"/>
+
+                        <!-- Ответственный -->
+                        <TextBlock Text="Ответственный *" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,10,0,0"/>
+                        <ComboBox ItemsSource="{Binding Responsibles}"
+                                  DisplayMemberPath="UserName"
+                                  SelectedValue="{Binding CurrentDocument.ResponsibleId}"
+                                  SelectedValuePath="UserId"/>
+
+                        <!-- Склад (для документов, требующих склад) -->
+                        <StackPanel Visibility="{Binding RequiresStorage, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="0,10,0,0">
+                            <TextBlock Text="Склад *" 
+                                       FontWeight="SemiBold"/>
+                            <ComboBox ItemsSource="{Binding Storages}"
+                                      DisplayMemberPath="StorageName"
+                                      SelectedValue="{Binding CurrentDocument.StorageId}"
+                                      SelectedValuePath="StorageId"/>
+                        </StackPanel>
+
+                        <!-- Поставщик (для поступления товаров) -->
+                        <StackPanel Visibility="{Binding RequiresSupplier, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="0,10,0,0">
+                            <TextBlock Text="Поставщик *" 
+                                       FontWeight="SemiBold"/>
+                            <ComboBox ItemsSource="{Binding Suppliers}"
+                                      DisplayMemberPath="PartnerName"
+                                      SelectedValue="{Binding CurrentDocument.SupplierId}"
+                                      SelectedValuePath="PartnerId"/>
+                        </StackPanel>
+
+                        <!-- Склад-отправитель (для перемещения) -->
+                        <StackPanel Visibility="{Binding RequiresTwoStorages, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="0,10,0,0">
+                            <TextBlock Text="Склад-отправитель *" 
+                                       FontWeight="SemiBold"/>
+                            <ComboBox ItemsSource="{Binding Storages}"
+                                      DisplayMemberPath="StorageName"
+                                      SelectedValue="{Binding CurrentDocument.SenderStorageId}"
+                                      SelectedValuePath="StorageId"/>
+                        </StackPanel>
+
+                        <!-- Склад-получатель (для перемещения) -->
+                        <StackPanel Visibility="{Binding RequiresTwoStorages, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="0,10,0,0">
+                            <TextBlock Text="Склад-получатель *" 
+                                       FontWeight="SemiBold"
+                                       Margin="0,10,0,0"/>
+                            <ComboBox ItemsSource="{Binding Storages}"
+                                      DisplayMemberPath="StorageName"
+                                      SelectedValue="{Binding CurrentDocument.RecipientStorageId}"
+                                      SelectedValuePath="StorageId"/>
+                        </StackPanel>
+
+                        <!-- Номер документа (генерируется автоматически) -->
+                        <TextBlock Text="Номер документа" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding CurrentDocument.DocumentNumber, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 Background="#F8F9FA"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Правая часть: Табличная часть (товары) -->
+            <Border Grid.Column="1" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Панель управления табличной частью -->
+                    <StackPanel Grid.Row="0" 
+                                Orientation="Horizontal" 
+                                Margin="0,0,0,15">
+                        <TextBlock Text="Товары" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+
+                        <Button Content="➕ Добавить товар" 
+                                Command="{Binding AddItemCommand}"
+                                Background="#28a745"
+                                Foreground="White"
+                                Margin="20,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- Таблица товаров -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding CurrentDocument.Items}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="False"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserResizeColumns="True"
+                              AlternatingRowBackground="#F8F9FA">
+
+                        <DataGrid.Columns>
+                            <!-- Наименование товара -->
+                            <DataGridTemplateColumn Header="Товар" Width="200">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.Products, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  DisplayMemberPath="ProductName"
+                                                  SelectedValue="{Binding ProductId}"
+                                                  SelectedValuePath="ProductId"
+                                                  SelectedItem="{Binding SelectedProduct, UpdateSourceTrigger=PropertyChanged}"
+                                                  IsSynchronizedWithCurrentItem="False"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Количество -->
+                            <DataGridTextColumn Header="Количество" 
+                                                Binding="{Binding Quantity, StringFormat={}{0:N2}}"
+                                                Width="100"/>
+
+                            <!-- Единица измерения -->
+                            <DataGridTemplateColumn Header="Ед. изм." Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.UnitsOfMeasurement, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  DisplayMemberPath="UnitOfMeasurementName"
+                                                  SelectedValue="{Binding UnitOfMeasurementId}"
+                                                  SelectedValuePath="UnitOfMeasurementId"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Характеристика -->
+                            <DataGridTemplateColumn Header="Характеристика" Width="150">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.Characteristics, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                  DisplayMemberPath="CharacteristicName"
+                                                  SelectedValue="{Binding CharacteristicId}"
+                                                  SelectedValuePath="CharacteristicId"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Действия -->
+                            <DataGridTemplateColumn Header="Действия" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="🗑️" 
+                                                Command="{Binding DataContext.RemoveItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Удалить"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Padding="5"
+                                                Cursor="Hand"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

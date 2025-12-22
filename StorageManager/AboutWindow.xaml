@@ -1,0 +1,93 @@
+﻿<Window x:Class="StorageManager.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="О программе" 
+        Height="400" 
+        Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow">
+
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="📦" FontSize="36" Margin="0,0,10,0"/>
+            <StackPanel>
+                <TextBlock Text="Система управления складом" 
+                           FontSize="18" 
+                           FontWeight="Bold"/>
+                <TextBlock Text="Версия 1.0.0" 
+                           Foreground="#666"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Информация -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Курсовая работа" 
+                           FontSize="16" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="Тема: Разработка системы управления складом"
+                           Margin="0,0,0,5"/>
+
+                <TextBlock Text="Выполнил:"
+                           FontWeight="SemiBold"
+                           Margin="0,10,0,5"/>
+                <TextBlock Text="Студент 4 курса"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="Научный руководитель:"
+                           FontWeight="SemiBold"
+                           Margin="0,10,0,5"/>
+                <TextBlock Text="ФИО руководителя"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="Описание системы:"
+                           FontWeight="SemiBold"
+                           Margin="0,10,0,5"/>
+                <TextBlock TextWrapping="Wrap">
+                    Система предназначена для учета товаров на складе, 
+                    управления перемещениями, контроля остатков и формирования отчетов. 
+                    Реализована на платформе .NET с использованием WPF и MS SQL Server.
+                </TextBlock>
+
+                <TextBlock Text="Используемые технологии:"
+                           FontWeight="SemiBold"
+                           Margin="0,10,0,5"/>
+                <StackPanel Margin="10,0,0,0">
+                    <TextBlock Text="• C#, WPF, .NET Framework"/>
+                    <TextBlock Text="• MS SQL Server"/>
+                    <TextBlock Text="• Паттерн MVVM"/>
+                    <TextBlock Text="• ADO.NET для работы с БД"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right"
+                    Margin="0,20,0,0">
+            <Button Content="Закрыть" 
+                    Click="CloseButton_Click"
+                    Background="#1565C0"
+                    Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Window>

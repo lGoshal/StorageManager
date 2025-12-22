@@ -1,0 +1,28 @@
+﻿<Application x:Class="StorageManager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:StorageManager"
+             StartupUri="LoginWindow.xaml">
+    <Application.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Foreground" Value="#212121"/>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8F9FA"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#E9ECEF"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#E9ECEF"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+    </Application.Resources>
+</Application>
