@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для Address.cs
+    /// </summary>
     public class Address
     {
         public int AddressId { get; set; }
@@ -18,7 +21,9 @@ namespace StorageManager.Models
         public string HouseNumber { get; set; }
         public string EntranceNumber { get; set; }
 
-        // Навигационные свойства
+        /// <summary>
+        /// Свойства
+        /// </summary>
         public string CountryName { get; set; }
         public string CityName { get; set; }
         public string StreetName { get; set; }

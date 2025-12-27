@@ -7,9 +7,16 @@ using StorageManager.Services;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentDetailsViewModel.cs
+    /// </summary>
     public class DocumentDetailsViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Свойства
+        /// </summary>
         private readonly DatabaseService _dbService;
+
         private Document _document;
         private bool _isLoading;
         private string _errorMessage;
@@ -20,19 +27,16 @@ namespace StorageManager.ViewModels
             get => _document;
             set => SetField(ref _document, value);
         }
-
         public bool IsLoading
         {
             get => _isLoading;
             set => SetField(ref _isLoading, value);
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
             set => SetField(ref _errorMessage, value);
         }
-
         public bool HasErrors
         {
             get => _hasErrors;
@@ -48,6 +52,9 @@ namespace StorageManager.ViewModels
             LoadDocumentDetailsAsync(documentItem);
         }
 
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
         private async Task LoadDocumentDetailsAsync(DocumentListItem documentItem)
         {
             IsLoading = true;
@@ -55,7 +62,6 @@ namespace StorageManager.ViewModels
 
             try
             {
-                // Создаем документ с данными из списка
                 Document = new Document
                 {
                     DocumentId = documentItem.DocumentId,
@@ -67,7 +73,6 @@ namespace StorageManager.ViewModels
                     LocationInfo = documentItem.LocationInfo
                 };
 
-                // Загружаем детали документа из БД
                 await LoadDocumentItemsAsync(documentItem);
 
                 HasErrors = false;
@@ -77,7 +82,6 @@ namespace StorageManager.ViewModels
                 ErrorMessage = $"Ошибка загрузки документа: {ex.Message}";
                 HasErrors = true;
 
-                // Если произошла ошибка, добавляем тестовые данные
                 await AddTestItemsAsync();
             }
             finally
@@ -85,15 +89,10 @@ namespace StorageManager.ViewModels
                 IsLoading = false;
             }
         }
-
         private async Task LoadDocumentItemsAsync(DocumentListItem documentItem)
         {
             try
             {
-                // TODO: Реализовать загрузку товаров документа из БД
-                // В зависимости от TableName и DocumentId
-
-                // Пока добавляем тестовые данные
                 await AddTestItemsAsync();
             }
             catch (Exception ex)
@@ -102,15 +101,12 @@ namespace StorageManager.ViewModels
                 throw;
             }
         }
-
         private async Task AddTestItemsAsync()
         {
             if (Document == null) return;
 
-            // Очищаем существующие товары
             Document.Items.Clear();
 
-            // Тестовые данные
             Document.Items.Add(new DocumentItem
             {
                 ItemId = 1,

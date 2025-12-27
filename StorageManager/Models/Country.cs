@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для Country.cs
+    /// </summary>
     public class Country
     {
         public int CountryId { get; set; }

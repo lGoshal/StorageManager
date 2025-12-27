@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentItem.cs
+    /// </summary>
     public class DocumentItem : INotifyPropertyChanged
     {
         private int _productId;
@@ -17,6 +20,9 @@ namespace StorageManager.Models
         private int? _characteristicId;
         private string _characteristicName;
 
+        /// <summary>
+        /// Свойства/События
+        /// </summary>
         public int ItemId { get; set; }
 
         public int ProductId
@@ -28,7 +34,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(ProductId));
             }
         }
-
         public string ProductName
         {
             get => _productName;
@@ -38,7 +43,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(ProductName));
             }
         }
-
         public decimal Quantity
         {
             get => _quantity;
@@ -48,7 +52,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(Quantity));
             }
         }
-
         public int? UnitOfMeasurementId
         {
             get => _unitOfMeasurementId;
@@ -58,7 +61,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(UnitOfMeasurementId));
             }
         }
-
         public string UnitOfMeasurementName
         {
             get => _unitOfMeasurementName;
@@ -68,7 +70,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(UnitOfMeasurementName));
             }
         }
-
         public int? CharacteristicId
         {
             get => _characteristicId;
@@ -78,7 +79,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(CharacteristicId));
             }
         }
-
         public string CharacteristicName
         {
             get => _characteristicName;
@@ -88,10 +88,8 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(CharacteristicName));
             }
         }
-
         public decimal? RemainingQuantity { get; set; }
 
-        // Для ComboBox в DataGrid
         public Product SelectedProduct { get; set; }
         public UnitOfMeasurement SelectedUnit { get; set; }
         public Characteristic SelectedCharacteristic { get; set; }

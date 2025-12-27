@@ -4,14 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StorageManager"
+             xmlns:converters="clr-namespace:StorageManager.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
-
     <UserControl.Resources>
-        <!-- Добавляем конвертер -->
-        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
-        <!-- Остальные стили -->
         <Style TargetType="TextBox">
             <Setter Property="Margin" Value="0,5,0,10"/>
             <Setter Property="Padding" Value="8"/>
@@ -38,7 +36,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок и кнопки действий -->
         <Border Grid.Row="0" 
                 Background="#1565C0" 
                 CornerRadius="8"
@@ -75,14 +72,12 @@
             </Grid>
         </Border>
 
-        <!-- Основной контент -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Левая часть: Список складов -->
             <Border Grid.Column="0" 
                     Margin="0,0,10,0"
                     BorderBrush="#E0E0E0" 
@@ -94,11 +89,10 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Поиск -->
                     <StackPanel Grid.Row="0" 
                                 Orientation="Horizontal" 
                                 Margin="15,15,15,10">
-                        <!-- Поиск -->
+
                         <StackPanel Width="300" Margin="0,0,10,0">
                             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                                      Background="White"
@@ -126,7 +120,6 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Список складов -->
                     <DataGrid Grid.Row="1"
                               ItemsSource="{Binding FilteredStorages}"
                               SelectedItem="{Binding SelectedStorage}"
@@ -197,7 +190,6 @@
                 </Grid>
             </Border>
 
-            <!-- Правая часть: Форма редактирования -->
             <Border Grid.Column="1" 
                     BorderBrush="#E0E0E0" 
                     BorderThickness="1" 
@@ -210,7 +202,6 @@
                                    FontWeight="Bold"
                                    Margin="0,0,0,20"/>
 
-                        <!-- Форма -->
                         <StackPanel>
                             <TextBlock Text="Название склада *" 
                                        FontWeight="SemiBold"/>
@@ -219,13 +210,11 @@
                             <TextBlock Text="Адрес" 
                                        FontWeight="SemiBold"
                                        Margin="0,10,0,0"/>
-                            <!-- Пока просто текстовое поле для адреса, потом можно сделать выпадающий список -->
                             <TextBox Text="{Binding CurrentStorage.TempAddress, UpdateSourceTrigger=PropertyChanged}"
                                      Height="80"
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"/>
 
-                            <!-- Кнопки формы -->
                             <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="Right"
                                         Margin="0,20,0,0">
@@ -241,7 +230,6 @@
                                         Margin="10,0,0,0"/>
                             </StackPanel>
 
-                            <!-- Сообщения об ошибках -->
                             <Border Background="#FFEBEE" 
                                     BorderBrush="#EF9A9A" 
                                     BorderThickness="1" 

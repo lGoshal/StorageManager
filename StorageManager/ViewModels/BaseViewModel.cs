@@ -3,6 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Реализация INotifyPropertyChanged
+    /// </summary>
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -11,7 +14,6 @@ namespace StorageManager.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
         protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для Partner.cs
+    /// </summary>
     public class Partner
     {
         public int PartnerId { get; set; }

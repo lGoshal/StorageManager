@@ -9,11 +9,17 @@ using StorageManager.Services;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для DashboardViewModel.cs
+    /// </summary>
     public class DashboardViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Коллекции/Свойства/Команды
+        /// </summary>
         private readonly DatabaseService _dbService;
+        private ObservableCollection<RecentDocument> _recentDocuments;
 
-        // Статистика
         private int _productsCount;
         private int _warehousesCount;
         private int _partnersCount;
@@ -24,74 +30,59 @@ namespace StorageManager.ViewModels
         private string _documentsChange;
         private bool _isLoading;
 
-        // Коллекции
-        private ObservableCollection<RecentDocument> _recentDocuments;
-
-        // Свойства
         public int ProductsCount
         {
             get => _productsCount;
             set => SetField(ref _productsCount, value);
         }
-
         public int WarehousesCount
         {
             get => _warehousesCount;
             set => SetField(ref _warehousesCount, value);
         }
-
         public int PartnersCount
         {
             get => _partnersCount;
             set => SetField(ref _partnersCount, value);
         }
-
         public int DocumentsCount
         {
             get => _documentsCount;
             set => SetField(ref _documentsCount, value);
         }
-
         public string ProductsChange
         {
             get => _productsChange;
             set => SetField(ref _productsChange, value);
         }
-
         public string WarehousesChange
         {
             get => _warehousesChange;
             set => SetField(ref _warehousesChange, value);
         }
-
         public string PartnersChange
         {
             get => _partnersChange;
             set => SetField(ref _partnersChange, value);
         }
-
         public string DocumentsChange
         {
             get => _documentsChange;
             set => SetField(ref _documentsChange, value);
         }
-
         public bool IsLoading
         {
             get => _isLoading;
             set => SetField(ref _isLoading, value);
         }
-
         public ObservableCollection<RecentDocument> RecentDocuments
         {
             get => _recentDocuments;
             set => SetField(ref _recentDocuments, value);
         }
 
-        // Команды
         public ICommand LoadDashboardDataCommand { get; }
 
-        // Конструктор
         public DashboardViewModel(string connectionString)
         {
             _dbService = new DatabaseService(connectionString);
@@ -99,11 +90,12 @@ namespace StorageManager.ViewModels
 
             LoadDashboardDataCommand = new RelayCommand(async _ => await LoadDashboardDataAsync());
 
-            // Загружаем данные при создании
             LoadDashboardDataCommand.Execute(null);
         }
 
-        // Метод загрузки данных дашборда
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
         public async Task LoadDashboardDataAsync()
         {
             IsLoading = true;
@@ -112,10 +104,7 @@ namespace StorageManager.ViewModels
             {
                 await Task.Run(async () =>
                 {
-                    // Загружаем статистику
                     await LoadStatisticsAsync();
-
-                    // Загружаем последние документы
                     await LoadRecentDocumentsAsync();
                 });
             }
@@ -129,12 +118,10 @@ namespace StorageManager.ViewModels
                 IsLoading = false;
             }
         }
-
         private async Task LoadStatisticsAsync()
         {
             try
             {
-                // Товары - сравниваем с прошлой неделей
                 var products = await _dbService.GetProductsAsync();
                 ProductsCount = products.Count;
 
@@ -142,7 +129,6 @@ namespace StorageManager.ViewModels
                 var productsDiff = ProductsCount - productsLastWeek;
                 ProductsChange = FormatChangeText(productsDiff, "за неделю");
 
-                // Склады - сравниваем с прошлым месяцем
                 var warehouses = await _dbService.GetStoragesAsync();
                 WarehousesCount = warehouses.Count;
 
@@ -150,7 +136,6 @@ namespace StorageManager.ViewModels
                 var warehousesDiff = WarehousesCount - warehousesLastMonth;
                 WarehousesChange = FormatChangeText(warehousesDiff, "за месяц");
 
-                // Контрагенты - сравниваем с прошлым месяцем
                 var partnersCount = await GetPartnersCountAsync();
                 PartnersCount = partnersCount;
 
@@ -158,7 +143,6 @@ namespace StorageManager.ViewModels
                 var partnersDiff = PartnersCount - partnersLastMonth;
                 PartnersChange = FormatChangeText(partnersDiff, "за месяц");
 
-                // Документы - сравниваем с прошлой неделей
                 var documentsCount = await GetDocumentsCountAsync();
                 DocumentsCount = documentsCount;
 
@@ -169,12 +153,9 @@ namespace StorageManager.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка загрузки статистики: {ex.Message}");
-                // Устанавливаем заглушки при ошибке
                 SetDefaultChangeTexts();
             }
         }
-
-        // Метод для форматирования текста изменения
         private string FormatChangeText(int difference, string period)
         {
             if (difference > 0)
@@ -190,8 +171,6 @@ namespace StorageManager.ViewModels
                 return $"Без изменений {period}";
             }
         }
-
-        // Метод для установки значений по умолчанию при ошибке
         private void SetDefaultChangeTexts()
         {
             ProductsChange = "Нет данных";
@@ -199,7 +178,6 @@ namespace StorageManager.ViewModels
             PartnersChange = "Нет данных";
             DocumentsChange = "Нет данных";
         }
-
         private async Task LoadRecentDocumentsAsync()
         {
             try
@@ -220,8 +198,6 @@ namespace StorageManager.ViewModels
                 Console.WriteLine($"Ошибка загрузки документов: {ex.Message}");
             }
         }
-
-        // Вспомогательные методы для работы с БД
         private async Task<int> GetPartnersCountAsync()
         {
             try
@@ -241,7 +217,6 @@ namespace StorageManager.ViewModels
                 return 0;
             }
         }
-
         private async Task<int> GetDocumentsCountAsync()
         {
             try
@@ -272,7 +247,6 @@ namespace StorageManager.ViewModels
                 return 0;
             }
         }
-
         private async Task<ObservableCollection<RecentDocument>> GetRecentDocumentsAsync()
         {
             var documents = new ObservableCollection<RecentDocument>();
@@ -395,8 +369,5 @@ namespace StorageManager.ViewModels
 
             return documents;
         }
-
-        // Добавим свойство для доступа к строке подключения
-        public string ConnectionString => _dbService.ConnectionString;
     }
 }

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для Characteristic.cs
+    /// </summary>
     public class Characteristic
     {
         public int CharacteristicId { get; set; }

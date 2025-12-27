@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для City.cs
+    /// </summary>
     public class City
     {
         public int CityId { get; set; }

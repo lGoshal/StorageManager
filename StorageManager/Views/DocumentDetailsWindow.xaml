@@ -24,7 +24,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
         <Border Grid.Row="0" Background="#1565C0" CornerRadius="6">
             <StackPanel Margin="15">
                 <TextBlock Text="{Binding Document.DocumentType}" 
@@ -38,14 +37,12 @@
             </StackPanel>
         </Border>
 
-        <!-- Основная информация -->
         <Grid Grid.Row="1" Margin="0,15,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Левая колонка - реквизиты -->
             <Border Grid.Column="0" Margin="0,0,10,0">
                 <StackPanel>
                     <TextBlock Text="Реквизиты документа" 
@@ -93,7 +90,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Правая колонка - товары -->
             <Border Grid.Column="1">
                 <StackPanel>
                     <TextBlock Text="Товары" 
@@ -131,7 +127,6 @@
             </Border>
         </Grid>
 
-        <!-- Кнопки -->
         <StackPanel Grid.Row="2" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right"

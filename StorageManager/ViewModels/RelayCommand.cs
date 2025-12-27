@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Реализация ICommand
+    /// </summary>
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
@@ -21,7 +24,6 @@ namespace StorageManager.ViewModels
         }
 
         public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
-
         public void Execute(object parameter) => _execute(parameter);
     }
 }

@@ -26,13 +26,21 @@ namespace StorageManager.Views
         {
             InitializeComponent();
 
-            // Создаем ViewModel для редактирования
             var viewModel = new DocumentEditViewModel(connectionString, documentItem);
             DocumentViewControl.DataContext = viewModel;
 
-            // Подписываемся на событие закрытия
-            viewModel.DocumentSaved += (s, e) => this.DialogResult = true;
-            viewModel.DocumentCanceled += (s, e) => this.DialogResult = false;
+
+            viewModel.DocumentSaved += (s, e) =>
+            {
+                this.DialogResult = true;
+                this.Close();
+            };
+
+            viewModel.DocumentCanceled += (s, e) =>
+            {
+                this.DialogResult = false;
+                this.Close();
+            };
         }
     }
 }

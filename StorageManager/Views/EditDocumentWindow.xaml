@@ -9,7 +9,6 @@
         ResizeMode="CanResizeWithGrip">
 
     <Grid>
-        <!-- Можно использовать тот же UserControl DocumentView -->
         <local:DocumentView x:Name="DocumentViewControl"/>
     </Grid>
 </Window>

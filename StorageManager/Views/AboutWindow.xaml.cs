@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace StorageManager
+namespace StorageManager.Views
 {
     /// <summary>
     /// Логика взаимодействия для AboutWindow.xaml
@@ -23,7 +23,6 @@ namespace StorageManager
         {
             InitializeComponent();
         }
-
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

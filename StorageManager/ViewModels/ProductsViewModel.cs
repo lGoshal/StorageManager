@@ -11,11 +11,16 @@ using StorageManager.Services;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для ProductsViewModel.cs
+    /// </summary>
     public class ProductsViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Коллекции/Листы/Свойства/Команды
+        /// </summary>
         private readonly DatabaseService _dbService;
 
-        // Коллекции
         private ObservableCollection<Product> _products;
         private ObservableCollection<Product> _filteredProducts;
         private List<ProductType> _productTypes;
@@ -23,50 +28,41 @@ namespace StorageManager.ViewModels
         private List<Characteristic> _characteristics;
         private List<ExpirationDateUnit> _expirationDateUnits;
 
-        // Текущие объекты
         private Product _currentProduct;
         private Product _selectedProduct;
         private ProductType _selectedProductTypeFilter;
 
-        // Поиск и фильтры
         private string _searchText;
         private string _errorMessage;
 
-        // Флаги состояния
         private bool _isEditing;
         private bool _hasErrors;
 
-        // Свойства
         public ObservableCollection<Product> Products
         {
             get => _products;
             set => SetField(ref _products, value);
         }
-
         public ObservableCollection<Product> FilteredProducts
         {
             get => _filteredProducts;
             set => SetField(ref _filteredProducts, value);
         }
-
         public List<ProductType> ProductTypes
         {
             get => _productTypes;
             set => SetField(ref _productTypes, value);
         }
-
         public List<Characteristic> Characteristics
         {
             get => _characteristics;
             set => SetField(ref _characteristics, value);
         }
-
         public Product CurrentProduct
         {
             get => _currentProduct;
             set => SetField(ref _currentProduct, value);
         }
-
         public Product SelectedProduct
         {
             get => _selectedProduct;
@@ -78,7 +74,6 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public ProductType SelectedProductTypeFilter
         {
             get => _selectedProductTypeFilter;
@@ -87,11 +82,10 @@ namespace StorageManager.ViewModels
                 if (SetField(ref _selectedProductTypeFilter, value))
                 {
                     ApplyFilters();
-                    OnPropertyChanged(nameof(HasActiveFilters)); // Уведомляем об изменении
+                    OnPropertyChanged(nameof(HasActiveFilters));
                 }
             }
         }
-
         public string SearchText
         {
             get => _searchText;
@@ -100,35 +94,30 @@ namespace StorageManager.ViewModels
                 if (SetField(ref _searchText, value))
                 {
                     ApplyFilters();
-                    OnPropertyChanged(nameof(HasActiveFilters)); // Уведомляем об изменении
+                    OnPropertyChanged(nameof(HasActiveFilters));
                 }
             }
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
             set => SetField(ref _errorMessage, value);
         }
-
         public bool IsEditing
         {
             get => _isEditing;
             set => SetField(ref _isEditing, value);
         }
-
         public bool HasErrors
         {
             get => _hasErrors;
             set => SetField(ref _hasErrors, value);
         }
 
-        // Вычисляемые свойства
         public string FormTitle => IsEditing ? "Редактирование товара" : "Новый товар";
         public string SaveButtonText => IsEditing ? "Сохранить изменения" : "Создать товар";
         public bool HasActiveFilters => SelectedProductTypeFilter != null || !string.IsNullOrWhiteSpace(SearchText);
 
-        // Команды
         public ICommand LoadProductsCommand { get; }
         public ICommand AddProductCommand { get; }
         public ICommand EditProductCommand { get; }
@@ -138,7 +127,6 @@ namespace StorageManager.ViewModels
         public ICommand ResetFilterCommand { get; }
         public ICommand ResetTypeFilterCommand { get; }
 
-        // Конструктор
         public ProductsViewModel(string connectionString)
         {
             _dbService = new DatabaseService(connectionString);
@@ -148,7 +136,6 @@ namespace StorageManager.ViewModels
             ProductTypes = new List<ProductType>();
             Characteristics = new List<Characteristic>();
 
-            // Инициализация команд
             LoadProductsCommand = new RelayCommand(async _ => await LoadDataAsync());
             AddProductCommand = new RelayCommand(_ => AddNewProduct());
             EditProductCommand = new RelayCommand(EditProduct);
@@ -158,65 +145,20 @@ namespace StorageManager.ViewModels
             ResetFilterCommand = new RelayCommand(_ => ResetFilters());
             ResetTypeFilterCommand = new RelayCommand(_ => ResetTypeFilter());
 
-            // Создаем новый продукт по умолчанию
             CurrentProduct = new Product();
 
-            // Загружаем данные
             LoadProductsCommand.Execute(null);
         }
-        private void ResetFilters()
-        {
-            SelectedProductTypeFilter = null;
-            SearchText = string.Empty;
-        }
 
-        private void ResetTypeFilter()
-        {
-            SelectedProductTypeFilter = null;
-        }
-
-        // Метод загрузки данных
-        private async Task LoadDataAsync()
-        {
-            try
-            {
-                // Загружаем товары
-                var products = await _dbService.GetProductsAsync();
-                Products.Clear();
-
-                foreach (var product in products)
-                {
-                    Products.Add(product);
-                }
-
-                // Загружаем типы товаров
-                ProductTypes = await _dbService.GetProductTypesAsync();
-                OnPropertyChanged(nameof(ProductTypes));
-
-                // Применяем фильтры
-                ApplyFilters();
-
-                // Сбрасываем форму
-                CancelEditing();
-
-                HasErrors = false;
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Ошибка загрузки данных: {ex.Message}";
-                HasErrors = true;
-            }
-        }
-
-        // Добавление нового товара
+        /// <summary>
+        /// CRUD - операции
+        /// </summary>
         private void AddNewProduct()
         {
             CurrentProduct = new Product();
             IsEditing = true;
             HasErrors = false;
         }
-
-        // Редактирование товара
         private void EditProduct(object parameter)
         {
             if (parameter is Product product)
@@ -235,8 +177,6 @@ namespace StorageManager.ViewModels
                 HasErrors = false;
             }
         }
-
-        // Удаление товара
         private async Task DeleteProductAsync(Product product)
         {
             if (product == null) return;
@@ -261,11 +201,8 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
-        // Сохранение товара
         private async Task SaveProductAsync()
         {
-            // Валидация
             if (string.IsNullOrWhiteSpace(CurrentProduct.ProductName))
             {
                 ErrorMessage = "Название товара обязательно для заполнения";
@@ -284,16 +221,13 @@ namespace StorageManager.ViewModels
             {
                 if (IsEditing && CurrentProduct.ProductId > 0)
                 {
-                    // Обновление существующего товара
                     await _dbService.UpdateProductAsync(CurrentProduct);
                 }
                 else
                 {
-                    // Добавление нового товара
                     await _dbService.AddProductAsync(CurrentProduct);
                 }
 
-                // Обновляем список
                 await LoadDataAsync();
 
                 HasErrors = false;
@@ -304,8 +238,6 @@ namespace StorageManager.ViewModels
                 HasErrors = true;
             }
         }
-
-        // Отмена редактирования
         private void CancelEditing()
         {
             CurrentProduct = new Product();
@@ -313,7 +245,45 @@ namespace StorageManager.ViewModels
             HasErrors = false;
         }
 
-        // Применение фильтров
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
+        private void ResetFilters()
+        {
+            SelectedProductTypeFilter = null;
+            SearchText = string.Empty;
+        }
+        private void ResetTypeFilter()
+        {
+            SelectedProductTypeFilter = null;
+        }
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                var products = await _dbService.GetProductsAsync();
+                Products.Clear();
+
+                foreach (var product in products)
+                {
+                    Products.Add(product);
+                }
+
+                ProductTypes = await _dbService.GetProductTypesAsync();
+                OnPropertyChanged(nameof(ProductTypes));
+
+                ApplyFilters();
+
+                CancelEditing();
+
+                HasErrors = false;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Ошибка загрузки данных: {ex.Message}";
+                HasErrors = true;
+            }
+        }
         private void ApplyFilters()
         {
             if (Products == null || !Products.Any())
@@ -324,13 +294,11 @@ namespace StorageManager.ViewModels
 
             IEnumerable<Product> filtered = Products;
 
-            // Фильтр по типу товара
             if (SelectedProductTypeFilter != null)
             {
                 filtered = filtered.Where(p => p.ProductTypeId == SelectedProductTypeFilter.ProductTypeId);
             }
 
-            // Фильтр по тексту поиска
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string searchLower = SearchText.ToLower();
@@ -339,7 +307,6 @@ namespace StorageManager.ViewModels
                     (p.ProductDescription != null && p.ProductDescription.ToLower().Contains(searchLower)));
             }
 
-            // Обновляем отфильтрованную коллекцию
             FilteredProducts.Clear();
             foreach (var product in filtered.ToList())
             {

@@ -5,45 +5,51 @@ using System.Windows;
 using System.Windows.Input;
 using StorageManager.Models;
 using StorageManager.Services;
+using StorageManager.Views;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для MainViewModel.cs
+    /// </summary>
     public class MainViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Коллекции/Свойства/Команды
+        /// </summary>
         private readonly DatabaseService _dbService;
+
+        private bool _isDashboard = true;
         private User _currentUser;
         private ObservableCollection<Product> _products;
-
-        // Свойства
+       
+        public bool IsDashboard
+        {
+            get => _isDashboard;
+            set => SetField(ref _isDashboard, value);
+        }
+        public ObservableCollection<Product> Products
+        {
+            get => _products;
+            set => SetField(ref _products, value);
+        }
         public User CurrentUser
         {
             get => _currentUser;
             set => SetField(ref _currentUser, value);
         }
 
-        public ObservableCollection<Product> Products
-        {
-            get => _products;
-            set => SetField(ref _products, value);
-        }
-
-        // Команды
         public ICommand LoadProductsCommand { get; }
         public ICommand AddProductCommand { get; }
-        public ICommand ShowAboutCommand { get; }
 
-        // Конструктор
         public MainViewModel(string connectionString)
         {
             _dbService = new DatabaseService(connectionString);
             Products = new ObservableCollection<Product>();
 
-            // Инициализация команд
             LoadProductsCommand = new RelayCommand(async _ => await LoadProductsAsync());
             AddProductCommand = new RelayCommand(_ => ShowAddProductDialog());
-            ShowAboutCommand = new RelayCommand(_ => ShowAboutDialog());
 
-            // Создаем тестового пользователя
             CurrentUser = new User
             {
                 UserId = 1,
@@ -51,10 +57,12 @@ namespace StorageManager.ViewModels
                 Login = "admin"
             };
 
-            // Загружаем данные
             LoadProductsCommand.Execute(null);
         }
 
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
         private async Task LoadProductsAsync()
         {
             try
@@ -73,31 +81,10 @@ namespace StorageManager.ViewModels
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
         private void ShowAddProductDialog()
         {
             MessageBox.Show("Форма добавления товара будет реализована позже", "Информация",
                 MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void ShowAboutDialog()
-        {
-            // Это будет вызываться из View
-            // Реализация в MainWindow.xaml.cs
-        }
-
-        private bool _isDashboard = true;
-        public bool IsDashboard
-        {
-            get => _isDashboard;
-            set => SetField(ref _isDashboard, value);
-        }
-
-        // И метод для обновления состояния
-        private void UpdatePageState(string pageName)
-        {
-            IsDashboard = (pageName == "Dashboard");
-            OnPropertyChanged(nameof(IsDashboard));
         }
     }
 }

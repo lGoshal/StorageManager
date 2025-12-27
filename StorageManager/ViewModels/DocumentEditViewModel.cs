@@ -1,83 +1,39 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using System.Xml.Linq;
 using StorageManager.Models;
 using StorageManager.Services;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentEditViewModel.cs
+    /// </summary>
     public class DocumentEditViewModel : DocumentViewModel
     {
+        /// <summary>
+        /// Контекст/Свойства
+        /// </summary>
+        private readonly DatabaseService _dbService;
         private readonly DocumentListItem _originalDocument;
         public event EventHandler DocumentSaved;
         public event EventHandler DocumentCanceled;
 
         public DocumentEditViewModel(string connectionString, DocumentListItem documentItem)
-            : base(connectionString, GetDocumentTypeFromTableName(documentItem.TableName))
+        : base(connectionString, GetDocumentTypeFromTableName(documentItem.TableName))
         {
+            _dbService = new DatabaseService(connectionString);
             _originalDocument = documentItem ?? throw new ArgumentNullException(nameof(documentItem));
 
-            // Загружаем существующий документ
             LoadExistingDocumentAsync(documentItem);
         }
 
-        private static string GetDocumentTypeFromTableName(string tableName)
-        {
-            return tableName switch
-            {
-                "SettingTheInitialBalances" => "SettingTheInitialBalances",
-                "ProductReceipt" => "ProductReceipt",
-                "MovementOfGoods" => "MovementOfGoods",
-                "WriteOffOfGoods" => "WriteOffOfGoods",
-                "Inventory" => "Inventory",
-                _ => throw new ArgumentException($"Неизвестная таблица: {tableName}")
-            };
-        }
-
-        private async Task LoadExistingDocumentAsync(DocumentListItem documentItem)
-        {
-            IsLoading = true;
-
-            try
-            {
-                // Загружаем данные документа из БД
-                await LoadDocumentFromDatabaseAsync(documentItem);
-
-                // Обновляем номер документа (сохраняем оригинальный)
-                CurrentDocument.DocumentNumber = documentItem.DocumentNumber;
-                CurrentDocument.DocumentId = documentItem.DocumentId;
-                CurrentDocument.Status = documentItem.Status;
-
-                HasErrors = false;
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Ошибка загрузки документа: {ex.Message}";
-                HasErrors = true;
-                MessageBox.Show(ErrorMessage, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        private async Task LoadDocumentFromDatabaseAsync(DocumentListItem documentItem)
-        {
-            // TODO: Реализовать загрузку документа из БД
-            // В зависимости от TableName и DocumentId
-
-            // Пока создаем тестовый документ
-            CurrentDocument.DocumentType = documentItem.DocumentType;
-            CurrentDocument.DocumentDate = documentItem.DocumentDate;
-            CurrentDocument.ResponsibleName = documentItem.ResponsibleName;
-            CurrentDocument.LocationInfo = documentItem.LocationInfo;
-
-            // Добавляем тестовые товары
-            await AddTestItemsAsync();
-        }
-
-        // Переопределяем метод сохранения черновика
+        /// <summary>
+        /// CRUD - операции
+        /// </summary>
         protected override async Task SaveDraftAsync()
         {
             if (!ValidateDocument())
@@ -85,25 +41,26 @@ namespace StorageManager.ViewModels
 
             try
             {
-                // Обновляем статус
                 CurrentDocument.Status = "Черновик";
 
-                // TODO: Реализовать обновление документа в БД
-                bool success = await UpdateDocumentInDatabaseAsync();
+                bool isNew = CurrentDocument.DocumentId == 0;
 
-                if (success)
-                {
-                    MessageBox.Show($"Документ {CurrentDocument.DocumentNumber} обновлен", "Успех",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                int documentId = await DbService.SaveDocumentAsync(
+                    CurrentDocument,
+                    GetTableNameFromDocumentType(DocumentType),
+                    isPosting: false,
+                    isNew: isNew);
 
-                    DocumentSaved?.Invoke(this, EventArgs.Empty);
-                    HasErrors = false;
-                }
-                else
+                if (isNew)
                 {
-                    ErrorMessage = "Ошибка обновления документа";
-                    HasErrors = true;
+                    CurrentDocument.DocumentId = documentId;
                 }
+
+                MessageBox.Show($"Документ {CurrentDocument.DocumentNumber} сохранен как черновик", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                DocumentSaved?.Invoke(this, EventArgs.Empty);
+                HasErrors = false;
             }
             catch (Exception ex)
             {
@@ -111,8 +68,6 @@ namespace StorageManager.ViewModels
                 HasErrors = true;
             }
         }
-
-        // Переопределяем метод проведения документа
         protected override async Task PostDocumentAsync()
         {
             if (!ValidateDocument())
@@ -131,22 +86,24 @@ namespace StorageManager.ViewModels
             {
                 CurrentDocument.Status = "Проведен";
 
-                // TODO: Реализовать обновление и проведение документа в БД
-                bool success = await UpdateDocumentInDatabaseAsync();
+                bool isNew = CurrentDocument.DocumentId == 0;
 
-                if (success)
-                {
-                    MessageBox.Show($"Документ {CurrentDocument.DocumentNumber} обновлен и проведен", "Успех",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                int documentId = await DbService.SaveDocumentAsync(
+                    CurrentDocument,
+                    GetTableNameFromDocumentType(DocumentType),
+                    isPosting: true,
+                    isNew: isNew);
 
-                    DocumentSaved?.Invoke(this, EventArgs.Empty);
-                    HasErrors = false;
-                }
-                else
+                if (isNew)
                 {
-                    ErrorMessage = "Ошибка проведения документа";
-                    HasErrors = true;
+                    CurrentDocument.DocumentId = documentId;
                 }
+
+                MessageBox.Show($"Документ {CurrentDocument.DocumentNumber} обновлен и проведен", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                DocumentSaved?.Invoke(this, EventArgs.Empty);
+                HasErrors = false;
             }
             catch (Exception ex)
             {
@@ -154,8 +111,6 @@ namespace StorageManager.ViewModels
                 HasErrors = true;
             }
         }
-
-        // Переопределяем метод отмены
         protected override void CancelDocument()
         {
             var result = MessageBox.Show(
@@ -169,43 +124,190 @@ namespace StorageManager.ViewModels
                 DocumentCanceled?.Invoke(this, EventArgs.Empty);
             }
         }
-
         private async Task<bool> UpdateDocumentInDatabaseAsync()
         {
-            // TODO: Реализовать обновление документа в БД
-            // В зависимости от типа документа и TableName
+            Console.WriteLine($"=== UpdateDocumentInDatabaseAsync: {CurrentDocument.DocumentNumber} ===");
+            Console.WriteLine($"Тип документа: {DocumentType}");
+            Console.WriteLine($"ID документа: {CurrentDocument.DocumentId}");
 
-            await Task.Delay(500); // Имитация сохранения
+            try
+            {
+                // Проверяем валидность данных перед сохранением
+                if (!ValidateDocumentForUpdate())
+                    return false;
 
-            // Возвращаем true для тестирования
-            return true;
+                // Используем DatabaseService для обновления документа
+                bool documentUpdated = await DbService.UpdateDocumentAsync(CurrentDocument, GetTableNameFromDocumentType(DocumentType));
+
+                if (!documentUpdated)
+                {
+                    ErrorMessage = "Не удалось обновить документ в БД";
+                    return false;
+                }
+
+                // Используем DatabaseService для обновления товаров
+                bool itemsUpdated = await DbService.UpdateDocumentItemsAsync(CurrentDocument, GetTableNameFromDocumentType(DocumentType));
+
+                if (!itemsUpdated)
+                {
+                    ErrorMessage = "Не удалось обновить товары документа";
+                    return false;
+                }
+
+                Console.WriteLine("Документ успешно обновлен в БД");
+                return true;
+            }
+            catch (SqlException sqlEx)
+            {
+                ErrorMessage = $"Ошибка базы данных: {sqlEx.Message}";
+                Console.WriteLine($"SQL ошибка: {sqlEx.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Ошибка обновления документа: {ex.Message}";
+                Console.WriteLine($"Ошибка: {ex.Message}");
+                return false;
+            }
         }
 
-        private async Task AddTestItemsAsync()
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
+        private static string GetDocumentTypeFromTableName(string tableName)
         {
-            // Очищаем существующие товары
-            CurrentDocument.Items.Clear();
-
-            // Тестовые данные
-            CurrentDocument.Items.Add(new DocumentItem
+            return tableName switch
             {
-                ItemId = 1,
-                ProductName = "Товар 1 (редактируемый)",
-                ProductId = 1,
-                Quantity = 10,
-                UnitOfMeasurementName = "шт."
-            });
+                "SettingTheInitialBalances" => "SettingTheInitialBalances",
+                "ProductReceipt" => "ProductReceipt",
+                "MovementOfGoods" => "MovementOfGoods",
+                "WriteOffOfGoods" => "WriteOffOfGoods",
+                "Inventory" => "Inventory",
+                _ => throw new ArgumentException($"Неизвестная таблица: {tableName}")
+            };
+        }
+        private async Task LoadExistingDocumentAsync(DocumentListItem documentItem)
+        {
+            IsLoading = true;
 
-            CurrentDocument.Items.Add(new DocumentItem
+            try
             {
-                ItemId = 2,
-                ProductName = "Товар 2 (редактируемый)",
-                ProductId = 2,
-                Quantity = 5,
-                UnitOfMeasurementName = "кг"
-            });
+                await LoadDocumentFromDatabaseAsync(documentItem);
 
-            await Task.CompletedTask;
+                CurrentDocument.DocumentNumber = documentItem.DocumentNumber;
+                CurrentDocument.DocumentId = documentItem.DocumentId;
+                CurrentDocument.Status = documentItem.Status;
+
+                HasErrors = false;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Ошибка загрузки документа: {ex.Message}";
+                HasErrors = true;
+                MessageBox.Show(ErrorMessage, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+        private async Task LoadDocumentFromDatabaseAsync(DocumentListItem documentItem)
+        {
+            try
+            {
+                var tableName = GetTableNameFromDocumentType(DocumentType);
+                var documentData = await _dbService.GetDocumentDataAsync(documentItem.DocumentId, tableName);
+
+                if (documentData != null)
+                {
+                    CurrentDocument.DocumentDate = documentData.DocumentDate;
+                    CurrentDocument.ResponsibleId = documentData.ResponsibleId;
+                    CurrentDocument.ResponsibleName = documentData.ResponsibleName;
+
+                    switch (tableName)
+                    {
+                        case "SettingTheInitialBalances":
+                        case "Inventory":
+                            CurrentDocument.StorageId = documentData.StorageId;
+                            CurrentDocument.LocationInfo = documentData.LocationInfo;
+                            break;
+                        case "ProductReceipt":
+                            CurrentDocument.SupplierId = documentData.SupplierId;
+                            CurrentDocument.StorageId = documentData.StorageId;
+                            CurrentDocument.LocationInfo = documentData.LocationInfo;
+                            break;
+                        case "MovementOfGoods":
+                            CurrentDocument.SenderStorageId = documentData.SenderStorageId;
+                            CurrentDocument.RecipientStorageId = documentData.RecipientStorageId;
+                            CurrentDocument.LocationInfo = documentData.LocationInfo;
+                            break;
+                    }
+                }
+
+                var items = await _dbService.GetDocumentItemsAsync(documentItem.DocumentId, tableName);
+                CurrentDocument.Items.Clear();
+
+                foreach (var item in items)
+                {
+                    CurrentDocument.Items.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки документа: {ex.Message}");
+                throw;
+            }
+        }
+        private bool ValidateDocumentForUpdate()
+        {
+            // Проверяем обязательные поля в зависимости от типа документа
+            switch (DocumentType)
+            {
+                case "SettingTheInitialBalances":
+                    if (CurrentDocument.StorageId == null)
+                    {
+                        ErrorMessage = "Не выбран склад";
+                        return false;
+                    }
+                    break;
+                case "Inventory":
+                    if (CurrentDocument.StorageId == null)
+                    {
+                        ErrorMessage = "Не выбран склад";
+                        return false;
+                    }
+                    break;
+
+                case "ProductReceipt":
+                    if (CurrentDocument.SupplierId == null)
+                    {
+                        ErrorMessage = "Не выбран поставщик";
+                        return false;
+                    }
+                    break;
+
+                case "MovementOfGoods":
+                    if (CurrentDocument.SenderStorageId == null || CurrentDocument.RecipientStorageId == null)
+                    {
+                        ErrorMessage = "Не выбраны склады отправитель и получатель";
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+        private string GetTableNameFromDocumentType(string documentType)
+        {
+            return documentType switch
+            {
+                "SettingTheInitialBalances" => "SettingTheInitialBalances",
+                "ProductReceipt" => "ProductReceipt",
+                "MovementOfGoods" => "MovementOfGoods",
+                "WriteOffOfGoods" => "WriteOffOfGoods",
+                "Inventory" => "Inventory",
+                _ => throw new ArgumentException($"Неизвестный тип документа: {documentType}")
+            };
         }
     }
 }

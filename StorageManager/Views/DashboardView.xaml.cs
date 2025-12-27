@@ -10,6 +10,9 @@ using System.Windows.Controls;
 
 namespace StorageManager.Views
 {
+    /// <summary>
+    /// Логика взаимодействия для DashboardView.xaml
+    /// </summary>
     public partial class DashboardView : UserControl
     {
         public DashboardView()

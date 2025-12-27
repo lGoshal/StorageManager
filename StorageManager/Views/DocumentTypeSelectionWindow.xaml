@@ -24,7 +24,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="📄 Выберите тип документа" 
                        FontSize="18" 
@@ -34,10 +33,8 @@
                        Margin="0,5,0,0"/>
         </StackPanel>
 
-        <!-- Список типов документов -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- Установка начальных остатков -->
                 <Button x:Name="btnInitialBalance" 
                         Content="📊 Установка начальных остатков"
                         Tag="SettingTheInitialBalances"
@@ -51,7 +48,6 @@
                     </Button.ToolTip>
                 </Button>
 
-                <!-- Поступление товаров -->
                 <Button x:Name="btnProductReceipt" 
                         Content="📥 Поступление товаров"
                         Tag="ProductReceipt"
@@ -66,7 +62,6 @@
                     </Button.ToolTip>
                 </Button>
 
-                <!-- Перемещение товаров -->
                 <Button x:Name="btnMovement" 
                         Content="🔄 Перемещение товаров"
                         Tag="MovementOfGoods"
@@ -81,7 +76,6 @@
                     </Button.ToolTip>
                 </Button>
 
-                <!-- Списание товаров -->
                 <Button x:Name="btnWriteOff" 
                         Content="📤 Списание товаров"
                         Tag="WriteOffOfGoods"
@@ -96,7 +90,6 @@
                     </Button.ToolTip>
                 </Button>
 
-                <!-- Инвентаризация -->
                 <Button x:Name="btnInventory" 
                         Content="📋 Инвентаризация"
                         Tag="Inventory"
@@ -113,7 +106,6 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Кнопка отмены -->
         <Button Grid.Row="2" 
                 Content="Отмена" 
                 Click="CancelButton_Click"

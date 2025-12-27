@@ -5,6 +5,9 @@ using System.Windows.Media;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для Document.cs
+    /// </summary>
     public class Document : INotifyPropertyChanged
     {
         private string _documentType;
@@ -23,6 +26,9 @@ namespace StorageManager.Models
         private string _status;
         private string _locationInfo;
 
+        /// <summary>
+        /// Свойства/События
+        /// </summary>
         public int DocumentId { get; set; }
 
         public string DocumentType
@@ -34,7 +40,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(DocumentType));
             }
         }
-
         public DateTime DocumentDate
         {
             get => _documentDate;
@@ -44,7 +49,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(DocumentDate));
             }
         }
-
         public string DocumentNumber
         {
             get => _documentNumber;
@@ -54,7 +58,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(DocumentNumber));
             }
         }
-
         public int ResponsibleId
         {
             get => _responsibleId;
@@ -64,7 +67,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(ResponsibleId));
             }
         }
-
         public string ResponsibleName
         {
             get => _responsibleName;
@@ -74,7 +76,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(ResponsibleName));
             }
         }
-
         public int? StorageId
         {
             get => _storageId;
@@ -84,7 +85,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(StorageId));
             }
         }
-
         public string StorageName
         {
             get => _storageName;
@@ -94,7 +94,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(StorageName));
             }
         }
-
         public int? SupplierId
         {
             get => _supplierId;
@@ -104,7 +103,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(SupplierId));
             }
         }
-
         public string SupplierName
         {
             get => _supplierName;
@@ -114,7 +112,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(SupplierName));
             }
         }
-
         public int? SenderStorageId
         {
             get => _senderStorageId;
@@ -124,7 +121,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(SenderStorageId));
             }
         }
-
         public string SenderStorageName
         {
             get => _senderStorageName;
@@ -134,7 +130,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(SenderStorageName));
             }
         }
-
         public int? RecipientStorageId
         {
             get => _recipientStorageId;
@@ -144,7 +139,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(RecipientStorageId));
             }
         }
-
         public string RecipientStorageName
         {
             get => _recipientStorageName;
@@ -154,7 +148,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(RecipientStorageName));
             }
         }
-
         public string Status
         {
             get => _status;
@@ -164,8 +157,6 @@ namespace StorageManager.Models
                 OnPropertyChanged(nameof(Status));
             }
         }
-
-        // Дополнительные свойства для отображения
         public string LocationInfo
         {
             get
@@ -194,7 +185,6 @@ namespace StorageManager.Models
             }
         }
 
-        // Цвета для статуса
         public Brush StatusBackground
         {
             get
@@ -208,12 +198,9 @@ namespace StorageManager.Models
                 };
             }
         }
-
         public Brush StatusForeground => Brushes.White;
 
-        // Детали документа (товары)
         public ObservableCollection<DocumentItem> Items { get; set; }
-
         public Document()
         {
             Items = new ObservableCollection<DocumentItem>();

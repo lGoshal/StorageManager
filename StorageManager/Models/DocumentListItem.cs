@@ -3,6 +3,9 @@ using System.Windows.Media;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentListItem.cs
+    /// </summary>
     public class DocumentListItem
     {
         public string DocumentType { get; set; }
@@ -15,7 +18,9 @@ namespace StorageManager.Models
         public string TableName { get; set; }
         public int ItemsCount { get; set; }
 
-        // Цвета для статуса
+        /// <summary>
+        /// Свойства
+        /// </summary>
         public Brush StatusBackground
         {
             get
@@ -29,7 +34,6 @@ namespace StorageManager.Models
                 };
             }
         }
-
         public Brush StatusForeground => Brushes.White;
     }
 }

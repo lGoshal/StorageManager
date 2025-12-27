@@ -20,12 +20,13 @@ namespace StorageManager.Views
     public partial class DocumentTypeSelectionWindow : Window
     {
         public string SelectedDocumentType { get; private set; }
-
         public DocumentTypeSelectionWindow()
         {
             InitializeComponent();
         }
-
+    /// <summary>
+    /// Логика обработки нажатий на кнопки формы
+    /// </summary>
         private void DocumentTypeButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;

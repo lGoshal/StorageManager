@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace StorageManager.Models
 {
+    /// <summary>
+    /// Логика взаимодействия для ExpirationDateUnit.cs
+    /// </summary>
     public class ExpirationDateUnit
     {
         public int ExpirationDateUnitId { get; set; }

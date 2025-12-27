@@ -12,29 +12,30 @@ using StorageManager.Views;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentsViewModel.cs
+    /// </summary>
     public class DocumentsViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Коллекции/Свойства/Команды
+        /// </summary>
         private readonly DatabaseService _dbService;
         private Window _ownerWindow;
 
-        // Коллекции
         private ObservableCollection<DocumentListItem> _documents;
         private ObservableCollection<DocumentTypeFilter> _documentTypes;
         private ObservableCollection<PeriodFilter> _periods;
+        private ObservableCollection<DocumentListItem> _filteredDocuments;
 
-        // Текущие фильтры
         private DocumentTypeFilter _selectedDocumentTypeFilter;
         private PeriodFilter _selectedPeriodFilter;
-        private ObservableCollection<DocumentListItem> _filteredDocuments;
         private DocumentListItem _selectedDocument;
         private string _searchText;
-
-        // Сообщения об ошибках
         private string _errorMessage;
         private bool _hasErrors;
         private bool _isLoading;
 
-        // Свойства
         public ObservableCollection<DocumentListItem> FilteredDocuments
         {
             get => _filteredDocuments;
@@ -45,19 +46,16 @@ namespace StorageManager.ViewModels
             get => _documents;
             set => SetField(ref _documents, value);
         }
-
         public ObservableCollection<DocumentTypeFilter> DocumentTypes
         {
             get => _documentTypes;
             set => SetField(ref _documentTypes, value);
         }
-
         public ObservableCollection<PeriodFilter> Periods
         {
             get => _periods;
             set => SetField(ref _periods, value);
         }
-
         public DocumentTypeFilter SelectedDocumentTypeFilter
         {
             get => _selectedDocumentTypeFilter;
@@ -69,7 +67,6 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public PeriodFilter SelectedPeriodFilter
         {
             get => _selectedPeriodFilter;
@@ -81,13 +78,11 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public DocumentListItem SelectedDocument
         {
             get => _selectedDocument;
             set => SetField(ref _selectedDocument, value);
         }
-
         public string SearchText
         {
             get => _searchText;
@@ -99,32 +94,27 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
             set => SetField(ref _errorMessage, value);
         }
-
         public bool HasErrors
         {
             get => _hasErrors;
             set => SetField(ref _hasErrors, value);
         }
-
         public bool IsLoading
         {
             get => _isLoading;
             set => SetField(ref _isLoading, value);
         }
 
-        // Команды
         public ICommand LoadDocumentsCommand { get; }
         public ICommand ViewDocumentCommand { get; }
         public ICommand EditDocumentCommand { get; }
         public ICommand DeleteDocumentCommand { get; }
 
-        // Конструктор
         public DocumentsViewModel(string connectionString, Window ownerWindow = null)
         {
             _dbService = new DatabaseService(connectionString);
@@ -134,24 +124,86 @@ namespace StorageManager.ViewModels
             DocumentTypes = new ObservableCollection<DocumentTypeFilter>();
             Periods = new ObservableCollection<PeriodFilter>();
 
-            // Инициализация команд
             LoadDocumentsCommand = new RelayCommand(async _ => await LoadDataAsync());
             ViewDocumentCommand = new RelayCommand(ViewDocument);
             EditDocumentCommand = new RelayCommand(EditDocument);
             DeleteDocumentCommand = new RelayCommand(async d => await DeleteDocumentAsync(d as DocumentListItem));
             FilteredDocuments = new ObservableCollection<DocumentListItem>();
 
-            // Инициализация фильтров
             InitializeFilters();
 
-            // Загружаем данные
             LoadDocumentsCommand.Execute(null);
         }
 
-        // Инициализация фильтров
+        /// <summary>
+        /// CRUD - операции
+        /// </summary>
+        private void ViewDocument(object parameter)
+        {
+            if (parameter is DocumentListItem document)
+            {
+                var detailsWindow = new DocumentDetailsWindow(document, _dbService.ConnectionString);
+                detailsWindow.Owner = _ownerWindow;
+                detailsWindow.ShowDialog();
+            }
+        }
+        private void EditDocument(object parameter)
+        {
+            if (parameter is DocumentListItem document)
+            {
+                try
+                {
+                    var editWindow = new EditDocumentWindow(document, _dbService.ConnectionString);
+                    editWindow.Owner = _ownerWindow;
+
+                    if (editWindow.ShowDialog() == true)
+                    {
+                        MessageBox.Show($"Документ {document.DocumentNumber} обновлен", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        LoadDocumentsCommand.Execute(null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка открытия редактора: {ex.Message}", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        private async Task DeleteDocumentAsync(DocumentListItem document)
+        {
+            if (document == null) return;
+
+            var result = MessageBox.Show(
+                $"Вы уверены, что хотите удалить документ '{document.DocumentNumber}'?",
+                "Подтверждение удаления",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    await Task.Delay(100);
+                    Documents.Remove(document);
+
+                    MessageBox.Show("Документ удален", "Успех",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"Ошибка удаления: {ex.Message}";
+                    HasErrors = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Служебные методы
+        /// </summary>
         private void InitializeFilters()
         {
-            // Типы документов
             DocumentTypes.Clear();
             DocumentTypes.Add(new DocumentTypeFilter { DocumentTypeId = 0, DocumentTypeName = "Все типы" });
             DocumentTypes.Add(new DocumentTypeFilter { DocumentTypeId = 1, DocumentTypeName = "Установка остатков" });
@@ -160,7 +212,6 @@ namespace StorageManager.ViewModels
             DocumentTypes.Add(new DocumentTypeFilter { DocumentTypeId = 4, DocumentTypeName = "Списание" });
             DocumentTypes.Add(new DocumentTypeFilter { DocumentTypeId = 5, DocumentTypeName = "Инвентаризация" });
 
-            // Периоды
             Periods.Clear();
             Periods.Add(new PeriodFilter { PeriodId = 0, PeriodName = "За все время" });
             Periods.Add(new PeriodFilter { PeriodId = 1, PeriodName = "Сегодня" });
@@ -169,12 +220,9 @@ namespace StorageManager.ViewModels
             Periods.Add(new PeriodFilter { PeriodId = 4, PeriodName = "За квартал" });
             Periods.Add(new PeriodFilter { PeriodId = 5, PeriodName = "За год" });
 
-            // Устанавливаем значения по умолчанию
             SelectedDocumentTypeFilter = DocumentTypes.First();
             SelectedPeriodFilter = Periods.First();
         }
-
-        // Загрузка данных
         private async Task LoadDataAsync()
         {
             IsLoading = true;
@@ -189,7 +237,7 @@ namespace StorageManager.ViewModels
                     Documents.Add(doc);
                 }
 
-                ApplyFilters(); // Вызываем фильтрацию после загрузки
+                ApplyFilters();
                 HasErrors = false;
             }
             catch (Exception ex)
@@ -202,8 +250,6 @@ namespace StorageManager.ViewModels
                 IsLoading = false;
             }
         }
-
-        // Получение всех документов
         private async Task<ObservableCollection<DocumentListItem>> GetAllDocumentsAsync()
         {
             var documents = new ObservableCollection<DocumentListItem>();
@@ -214,7 +260,6 @@ namespace StorageManager.ViewModels
                 {
                     await conn.OpenAsync();
 
-                    // Объединенный запрос для всех типов документов
                     var query = @"
                         SELECT 
                             DocumentType,
@@ -343,8 +388,6 @@ namespace StorageManager.ViewModels
 
             return documents;
         }
-
-        // Применение фильтров
         private void ApplyFilters()
         {
             if (Documents == null || !Documents.Any())
@@ -355,21 +398,18 @@ namespace StorageManager.ViewModels
 
             IEnumerable<DocumentListItem> filtered = Documents;
 
-            // Фильтр по типу документа
             if (SelectedDocumentTypeFilter != null && SelectedDocumentTypeFilter.DocumentTypeId > 0)
             {
                 string filterType = GetDocumentTypeNameById(SelectedDocumentTypeFilter.DocumentTypeId);
                 filtered = filtered.Where(d => d.DocumentType == filterType);
             }
 
-            // Фильтр по периоду
             if (SelectedPeriodFilter != null && SelectedPeriodFilter.PeriodId > 0)
             {
                 DateTime startDate = GetStartDateByPeriod(SelectedPeriodFilter.PeriodId);
                 filtered = filtered.Where(d => d.DocumentDate >= startDate);
             }
 
-            // Фильтр по поиску
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string searchLower = SearchText.ToLower();
@@ -379,7 +419,6 @@ namespace StorageManager.ViewModels
                     (d.LocationInfo != null && d.LocationInfo.ToLower().Contains(searchLower)));
             }
 
-            // Обновляем отфильтрованную коллекцию
             var filteredList = filtered.OrderByDescending(d => d.DocumentDate).ToList();
 
             FilteredDocuments.Clear();
@@ -388,10 +427,8 @@ namespace StorageManager.ViewModels
                 FilteredDocuments.Add(document);
             }
 
-            // Отладочный вывод
             Console.WriteLine($"Всего документов: {Documents.Count}, Отфильтровано: {FilteredDocuments.Count}");
         }
-
         private string GetDocumentTypeNameById(int typeId)
         {
             return typeId switch
@@ -404,108 +441,33 @@ namespace StorageManager.ViewModels
                 _ => ""
             };
         }
-
-        // Получение начальной даты по периоду
         private DateTime GetStartDateByPeriod(int periodId)
         {
             return periodId switch
             {
-                1 => DateTime.Today, // Сегодня
-                2 => DateTime.Today.AddDays(-7), // Неделя
-                3 => DateTime.Today.AddMonths(-1), // Месяц
-                4 => DateTime.Today.AddMonths(-3), // Квартал
-                5 => DateTime.Today.AddYears(-1), // Год
+                1 => DateTime.Today,
+                2 => DateTime.Today.AddDays(-7),
+                3 => DateTime.Today.AddMonths(-1),
+                4 => DateTime.Today.AddMonths(-3),
+                5 => DateTime.Today.AddYears(-1),
                 _ => DateTime.MinValue
             };
         }
-
-        // Просмотр документа
-        private void ViewDocument(object parameter)
-        {
-            if (parameter is DocumentListItem document)
-            {
-                var detailsWindow = new DocumentDetailsWindow(document, _dbService.ConnectionString);
-                detailsWindow.Owner = _ownerWindow;
-                detailsWindow.ShowDialog();
-            }
-        }
-
-        // Редактирование документа
-        private void EditDocument(object parameter)
-        {
-            if (parameter is DocumentListItem document)
-            {
-                try
-                {
-                    // Открываем окно редактирования
-                    var editWindow = new EditDocumentWindow(document, _dbService.ConnectionString);
-                    editWindow.Owner = _ownerWindow;
-
-                    if (editWindow.ShowDialog() == true)
-                    {
-                        // Документ успешно сохранен - обновляем список
-                        MessageBox.Show($"Документ {document.DocumentNumber} обновлен", "Успех",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        // Обновляем список документов
-                        LoadDocumentsCommand.Execute(null);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка открытия редактора: {ex.Message}", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
-
-        // Удаление документа
-        private async Task DeleteDocumentAsync(DocumentListItem document)
-        {
-            if (document == null) return;
-
-            var result = MessageBox.Show(
-                $"Вы уверены, что хотите удалить документ '{document.DocumentNumber}'?",
-                "Подтверждение удаления",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    // TODO: Реализовать удаление документа из БД
-                    await Task.Delay(100); // Заглушка
-
-                    // Удаляем из коллекции
-                    Documents.Remove(document);
-
-                    MessageBox.Show("Документ удален", "Успех",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    ErrorMessage = $"Ошибка удаления: {ex.Message}";
-                    HasErrors = true;
-                }
-            }
-        }
     }
 
-    // Модели для фильтров
+    /// <summary>
+    /// Классы для фильтров
+    /// </summary>
     public class DocumentTypeFilter
     {
         public int DocumentTypeId { get; set; }
         public string DocumentTypeName { get; set; }
     }
-
     public class PeriodFilter
     {
         public int PeriodId { get; set; }
         public string PeriodName { get; set; }
     }
-
-    // Модель для отображения в списке
     public class DocumentListItem
     {
         public string DocumentType { get; set; }
@@ -518,7 +480,7 @@ namespace StorageManager.ViewModels
         public string TableName { get; set; }
         public int ItemsCount { get; set; }
 
-        // Цвета для статуса
+
         public Brush StatusBackground
         {
             get
@@ -532,7 +494,6 @@ namespace StorageManager.ViewModels
                 };
             }
         }
-
         public Brush StatusForeground
         {
             get

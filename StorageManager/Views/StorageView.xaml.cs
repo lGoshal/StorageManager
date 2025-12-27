@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using StorageManager.ViewModels;
 
 namespace StorageManager.Views
 {
@@ -25,8 +24,6 @@ namespace StorageManager.Views
         {
             InitializeComponent();
         }
-
-        // Добавляем свойство для установки ViewModel
         public StorageViewModel ViewModel
         {
             get => (StorageViewModel)DataContext;

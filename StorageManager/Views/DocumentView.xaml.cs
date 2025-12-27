@@ -16,6 +16,9 @@ using System.Windows.Controls;
 
 namespace StorageManager.Views
 {
+    /// <summary>
+    /// Логика взаимодействия для DocumentView.xaml
+    /// </summary>
     public partial class DocumentView : UserControl
     {
         public DocumentView()

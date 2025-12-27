@@ -25,7 +25,6 @@ namespace StorageManager.Views
             InitializeComponent();
             DataContext = new DocumentDetailsViewModel(document, connectionString);
         }
-
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

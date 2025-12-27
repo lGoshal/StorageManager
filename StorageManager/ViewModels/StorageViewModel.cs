@@ -9,45 +9,43 @@ using StorageManager.Services;
 
 namespace StorageManager.ViewModels
 {
+    /// <summary>
+    /// Логика взаимодействия для StorageViewModel.cs
+    /// </summary>
     public class StorageViewModel : BaseViewModel
     {
+        /// <summary>
+        /// Контекст/Свойства/Коллекции/Команды
+        /// </summary>
         private readonly DatabaseService _dbService;
 
-        // Коллекции
         private ObservableCollection<Storage> _storages;
         private ObservableCollection<Storage> _filteredStorages;
 
-        // Текущие объекты
         private Storage _currentStorage;
         private Storage _selectedStorage;
 
-        // Поиск и фильтры
         private string _searchText;
         private string _errorMessage;
 
-        // Флаги состояния
         private bool _isEditing;
         private bool _hasErrors;
 
-        // Свойства
         public ObservableCollection<Storage> Storages
         {
             get => _storages;
             set => SetField(ref _storages, value);
         }
-
         public ObservableCollection<Storage> FilteredStorages
         {
             get => _filteredStorages;
             set => SetField(ref _filteredStorages, value);
         }
-
         public Storage CurrentStorage
         {
             get => _currentStorage;
             set => SetField(ref _currentStorage, value);
         }
-
         public Storage SelectedStorage
         {
             get => _selectedStorage;
@@ -59,7 +57,6 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public string SearchText
         {
             get => _searchText;
@@ -71,30 +68,25 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
             set => SetField(ref _errorMessage, value);
         }
-
         public bool IsEditing
         {
             get => _isEditing;
             set => SetField(ref _isEditing, value);
         }
-
         public bool HasErrors
         {
             get => _hasErrors;
             set => SetField(ref _hasErrors, value);
         }
 
-        // Вычисляемые свойства
         public string FormTitle => IsEditing ? "Редактирование склада" : "Новый склад";
         public string SaveButtonText => IsEditing ? "Сохранить изменения" : "Создать склад";
 
-        // Команды
         public ICommand LoadStoragesCommand { get; }
         public ICommand AddStorageCommand { get; }
         public ICommand EditStorageCommand { get; }
@@ -102,7 +94,6 @@ namespace StorageManager.ViewModels
         public ICommand SaveStorageCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Конструктор
         public StorageViewModel(string connectionString)
         {
             _dbService = new DatabaseService(connectionString);
@@ -110,7 +101,6 @@ namespace StorageManager.ViewModels
             Storages = new ObservableCollection<Storage>();
             FilteredStorages = new ObservableCollection<Storage>();
 
-            // Инициализация команд
             LoadStoragesCommand = new RelayCommand(async _ => await LoadDataAsync());
             AddStorageCommand = new RelayCommand(_ => AddNewStorage());
             EditStorageCommand = new RelayCommand(EditStorage);
@@ -118,51 +108,20 @@ namespace StorageManager.ViewModels
             SaveStorageCommand = new RelayCommand(async _ => await SaveStorageAsync());
             CancelCommand = new RelayCommand(_ => CancelEditing());
 
-            // Создаем новый склад по умолчанию
             CurrentStorage = new Storage();
 
-            // Загружаем данные
             LoadStoragesCommand.Execute(null);
         }
 
-        // Метод загрузки данных
-        private async Task LoadDataAsync()
-        {
-            try
-            {
-                // Загружаем склады
-                var storages = await _dbService.GetStoragesAsync();
-                Storages.Clear();
-
-                foreach (var storage in storages)
-                {
-                    Storages.Add(storage);
-                }
-
-                // Применяем фильтры
-                ApplyFilters();
-
-                // Сбрасываем форму
-                CancelEditing();
-
-                HasErrors = false;
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Ошибка загрузки данных: {ex.Message}";
-                HasErrors = true;
-            }
-        }
-
-        // Добавление нового склада
+        /// <summary>
+        /// CRUD - операции
+        /// </summary>
         private void AddNewStorage()
         {
             CurrentStorage = new Storage();
             IsEditing = true;
             HasErrors = false;
         }
-
-        // Редактирование склада
         private void EditStorage(object parameter)
         {
             if (parameter is Storage storage)
@@ -173,15 +132,13 @@ namespace StorageManager.ViewModels
                     StorageName = storage.StorageName,
                     StorageAddressId = storage.StorageAddressId,
                     FullAddress = storage.FullAddress,
-                    TempAddress = storage.FullAddress // Для редактирования
+                    TempAddress = storage.FullAddress
                 };
 
                 IsEditing = true;
                 HasErrors = false;
             }
         }
-
-        // Удаление склада
         private async Task DeleteStorageAsync(Storage storage)
         {
             if (storage == null) return;
@@ -206,11 +163,8 @@ namespace StorageManager.ViewModels
                 }
             }
         }
-
-        // Сохранение склада
         private async Task SaveStorageAsync()
         {
-            // Валидация
             if (string.IsNullOrWhiteSpace(CurrentStorage.StorageName))
             {
                 ErrorMessage = "Название склада обязательно для заполнения";
@@ -220,21 +174,15 @@ namespace StorageManager.ViewModels
 
             try
             {
-                // TODO: Реализовать сохранение адреса
-                // Пока просто сохраняем название склада
-
                 if (IsEditing && CurrentStorage.StorageId > 0)
                 {
-                    // Обновление существующего склада
                     await _dbService.UpdateStorageAsync(CurrentStorage);
                 }
                 else
                 {
-                    // Добавление нового склада
                     await _dbService.AddStorageAsync(CurrentStorage);
                 }
 
-                // Обновляем список
                 await LoadDataAsync();
 
                 HasErrors = false;
@@ -245,8 +193,6 @@ namespace StorageManager.ViewModels
                 HasErrors = true;
             }
         }
-
-        // Отмена редактирования
         private void CancelEditing()
         {
             CurrentStorage = new Storage();
@@ -254,7 +200,33 @@ namespace StorageManager.ViewModels
             HasErrors = false;
         }
 
-        // Применение фильтров
+        /// <summary>
+        /// Служебные модули
+        /// </summary>
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                var storages = await _dbService.GetStoragesAsync();
+                Storages.Clear();
+
+                foreach (var storage in storages)
+                {
+                    Storages.Add(storage);
+                }
+
+                ApplyFilters();
+
+                CancelEditing();
+
+                HasErrors = false;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Ошибка загрузки данных: {ex.Message}";
+                HasErrors = true;
+            }
+        }
         private void ApplyFilters()
         {
             if (Storages == null || !Storages.Any())
@@ -265,7 +237,6 @@ namespace StorageManager.ViewModels
 
             IEnumerable<Storage> filtered = Storages;
 
-            // Фильтр по тексту поиска
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string searchLower = SearchText.ToLower();
@@ -274,7 +245,6 @@ namespace StorageManager.ViewModels
                     (s.FullAddress != null && s.FullAddress.ToLower().Contains(searchLower)));
             }
 
-            // Обновляем отфильтрованную коллекцию
             FilteredStorages.Clear();
             foreach (var storage in filtered.ToList())
             {

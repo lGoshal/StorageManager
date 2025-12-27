@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:StorageManager"
+             xmlns:converters="clr-namespace:StorageManager.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
 
     <UserControl.Resources>
-        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <Style TargetType="TextBox">
             <Setter Property="Margin" Value="0,5,0,10"/>
@@ -35,7 +36,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
         <Border Grid.Row="0" 
                 Background="#1565C0" 
                 CornerRadius="8"
@@ -79,7 +79,6 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Левая часть: Реквизиты документа -->
             <Border Grid.Column="0" 
                     Margin="0,0,10,0"
                     BorderBrush="#E0E0E0" 
@@ -93,20 +92,17 @@
                                    FontWeight="Bold"
                                    Margin="0,0,0,20"/>
 
-                        <!-- Тип документа (только для чтения) -->
                         <TextBlock Text="Тип документа" 
                                    FontWeight="SemiBold"/>
                         <TextBox Text="{Binding CurrentDocument.DocumentType, Mode=OneWay}"
                                  IsReadOnly="True"
                                  Background="#F8F9FA"/>
 
-                        <!-- Дата документа -->
                         <TextBlock Text="Дата документа *" 
                                    FontWeight="SemiBold"
                                    Margin="0,10,0,0"/>
                         <DatePicker SelectedDate="{Binding CurrentDocument.DocumentDate}"/>
 
-                        <!-- Ответственный -->
                         <TextBlock Text="Ответственный *" 
                                    FontWeight="SemiBold"
                                    Margin="0,10,0,0"/>
@@ -115,7 +111,6 @@
                                   SelectedValue="{Binding CurrentDocument.ResponsibleId}"
                                   SelectedValuePath="UserId"/>
 
-                        <!-- Склад (для документов, требующих склад) -->
                         <StackPanel Visibility="{Binding RequiresStorage, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Margin="0,10,0,0">
                             <TextBlock Text="Склад *" 
@@ -126,7 +121,6 @@
                                       SelectedValuePath="StorageId"/>
                         </StackPanel>
 
-                        <!-- Поставщик (для поступления товаров) -->
                         <StackPanel Visibility="{Binding RequiresSupplier, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Margin="0,10,0,0">
                             <TextBlock Text="Поставщик *" 
@@ -137,7 +131,6 @@
                                       SelectedValuePath="PartnerId"/>
                         </StackPanel>
 
-                        <!-- Склад-отправитель (для перемещения) -->
                         <StackPanel Visibility="{Binding RequiresTwoStorages, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Margin="0,10,0,0">
                             <TextBlock Text="Склад-отправитель *" 
@@ -148,7 +141,6 @@
                                       SelectedValuePath="StorageId"/>
                         </StackPanel>
 
-                        <!-- Склад-получатель (для перемещения) -->
                         <StackPanel Visibility="{Binding RequiresTwoStorages, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Margin="0,10,0,0">
                             <TextBlock Text="Склад-получатель *" 
@@ -160,7 +152,6 @@
                                       SelectedValuePath="StorageId"/>
                         </StackPanel>
 
-                        <!-- Номер документа (генерируется автоматически) -->
                         <TextBlock Text="Номер документа" 
                                    FontWeight="SemiBold"
                                    Margin="0,10,0,0"/>
@@ -171,7 +162,6 @@
                 </ScrollViewer>
             </Border>
 
-            <!-- Правая часть: Табличная часть (товары) -->
             <Border Grid.Column="1" 
                     BorderBrush="#E0E0E0" 
                     BorderThickness="1" 
@@ -183,7 +173,6 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Панель управления табличной частью -->
                     <StackPanel Grid.Row="0" 
                                 Orientation="Horizontal" 
                                 Margin="0,0,0,15">
@@ -199,7 +188,6 @@
                                 Margin="20,0,0,0"/>
                     </StackPanel>
 
-                    <!-- Таблица товаров -->
                     <DataGrid Grid.Row="1"
                               ItemsSource="{Binding CurrentDocument.Items}"
                               AutoGenerateColumns="False"
@@ -211,7 +199,6 @@
                               AlternatingRowBackground="#F8F9FA">
 
                         <DataGrid.Columns>
-                            <!-- Наименование товара -->
                             <DataGridTemplateColumn Header="Товар" Width="200">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -224,13 +211,9 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-                            <!-- Количество -->
                             <DataGridTextColumn Header="Количество" 
                                                 Binding="{Binding Quantity, StringFormat={}{0:N2}}"
                                                 Width="100"/>
-
-                            <!-- Единица измерения -->
                             <DataGridTemplateColumn Header="Ед. изм." Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -241,8 +224,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-                            <!-- Характеристика -->
                             <DataGridTemplateColumn Header="Характеристика" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -253,8 +234,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-
-                            <!-- Действия -->
                             <DataGridTemplateColumn Header="Действия" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
